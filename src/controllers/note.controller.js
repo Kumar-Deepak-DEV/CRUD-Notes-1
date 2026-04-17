@@ -165,10 +165,59 @@ const replaceNote = async (req, res) => {
   }
 };
 
+const updateNote = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid note ID format",
+        data: null,
+      });
+    }
+
+    if (!updates || Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields provided to update",
+        data: null,
+      });
+    }
+
+    const updatedNote = await Note.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedNote) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Note updated successfully",
+      data: updatedNote,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
 module.exports = {
   createNote,
   createBulkNotes,
   getAllNotes,
   getNoteById,
   replaceNote,
+  updateNote,
 };
